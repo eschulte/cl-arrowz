@@ -53,16 +53,75 @@
           (ensure-lists (cdr forms)) :initial-value (car forms)))
 
 
+;;;; & Versions which short circuit.
+(defmacro &> (&rest forms)
+  "Like `->', but each form is guarded by a when."
+  (reduce (lambda (acc form)
+            (let ((acc-symbol (gensym "ACC")))
+              `(let ((,acc-symbol ,acc))
+                 (when ,acc-symbol
+                   ,(cons (car form) (cons acc-symbol (cdr form)))))))
+          (ensure-lists (cdr forms)) :initial-value (car forms)))
+
+(defmacro &>> (&rest forms)
+  "Like `->', but each form is guarded by a when."
+  (reduce (lambda (acc form)
+            (let ((acc-symbol (gensym "ACC")))
+              `(let ((,acc-symbol ,acc))
+                 (when ,acc-symbol
+                   ,(append form (list acc-symbol))))))
+          (ensure-lists (cdr forms)) :initial-value (car forms)))
+
+(defmacro &<> (&rest forms)
+  "Thread the result of each form as the last argument to subsequent forms."
+  (reduce (lambda (acc form)
+            (let ((acc-symbol (gensym "ACC")))
+              (multiple-value-bind (w/acc foundp)
+                  (replace-<> form acc-symbol)
+                `(let ((,acc-symbol ,acc))
+                   (when ,acc-symbol
+                     ,(if foundp
+                          w/acc
+                          (cons (car form) (cons acc (cdr form)))))))))
+          (ensure-lists (cdr forms)) :initial-value (car forms)))
+
+(defmacro &<>> (&rest forms)
+  "Thread the result of each form as the last argument to subsequent forms."
+  (reduce (lambda (acc form)
+            (let ((acc-symbol (gensym "ACC")))
+              (multiple-value-bind (w/acc foundp)
+                  (replace-<> form acc-symbol)
+                `(let ((,acc-symbol ,acc))
+                   (when ,acc-symbol
+                     ,(if foundp
+                          w/acc
+                          (append form (list acc-symbol))))))))
+          (ensure-lists (cdr forms)) :initial-value (car forms)))
+
+
 ;;;; Tests
 #|
 (-> 3 /)
 (-> 3 (expt 2))
+
 (->> 3 /)
 (->> 3 (expt 2))
+
 (-<> 3 /)
 (-<> 3 (expt 2))
 (-<> 3 (list <> <>))
+
 (-<>> 3 /)
 (-<>> 3 (expt 2))
 (-<>> 3 (list <> <>))
+
+(&> 3 /)
+(&> nil ((lambda (x) (error "Should never run on ~a~%" x))))
+(&>> 3 /)
+(&>> nil (error "Should never run on ~a~%"))
+
+(&<> 3 /)
+(&<> nil ((lambda (x) (error "Should never run on ~a~%" x))))
+(&<>> 3 /)
+(&<>> nil (error "Should never run on ~a~%"))
 |#
