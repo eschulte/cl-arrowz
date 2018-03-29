@@ -4,7 +4,7 @@
   (:use :common-lisp)
   (:export :-> :->> :-<> :-<>>
            :&> :&>> :&<> :&<>>
-           :z> :z>> :z<> :z<>>
+           :z>>
            :<>))
 (in-package :cl-arrowz/cl-arrowz)
 
@@ -99,6 +99,22 @@
           (ensure-lists (cdr forms)) :initial-value (car forms)))
 
 
+;;;; Z Versions with map composition.
+(defmacro z>> (&rest forms)
+  "Like `->>', but compose loops.  Prior forms always placed in loop position."
+  (let* ((result (gensym "RESULT"))
+         (current (gensym "TOP"))
+         (functions (reduce (lambda (acc form)
+                              (ecase (car form)
+                                (mapcar `(funcall ,(second form) ,acc))
+                                (mapc `(prog1 ,acc
+                                         (funcall ,(second form) ,acc)))))
+                            (cdr forms) :initial-value current)))
+    `(let (,result)
+       (dolist (,current ,(car forms) (nreverse ,result))
+         (push ,functions ,result)))))
+
+
 ;;;; Tests
 #|
 (-> 3 /)
@@ -124,4 +140,10 @@
 (&<> nil ((lambda (x) (error "Should never run on ~a~%" x))))
 (&<>> 3 /)
 (&<>> nil (error "Should never run on ~a~%"))
+
+(z>> '(1 2 3 4)
+     (mapcar #'1+)
+     (mapc (lambda (el) (format t "~a~%" el)))
+     (mapcar (lambda (x) (cons x x)))
+     (mapcar #'car))
 |#
