@@ -12,6 +12,11 @@ The primary features of this replacement are a maintainer and a license."
 
 (defsystem "cl-arrowz/tests"
   :class :package-inferred-system
-  :depends-on (rove
-	       cl-arrowz/tests/cl-arrowz)
-  :perform (test-op (o c) (uiop:symbol-call :rove '#:run c)))
+  :depends-on (prove cl-arrowz/tests/cl-arrowz)
+  ;; :build-operation "asdf:program-op"
+  ;; :build-pathname "test-cl-arrowz"
+  ;; :entry-point "cl-arrowz/tests/cl-arrowz::test"
+  :defsystem-depends-on (:prove-asdf)
+  :components ((:test-file "tests/cl-arrowz"))
+  :perform (test-op (o c)
+                    (uiop:symbol-call :cl-arrowz/tests/cl-arrowz '#:test)))
