@@ -16,7 +16,8 @@ The primary features of this replacement are a maintainer and a license."
   ;; :build-operation "asdf:program-op"
   ;; :build-pathname "test-cl-arrowz"
   ;; :entry-point "cl-arrowz/tests/cl-arrowz::test"
-  :defsystem-depends-on (:prove-asdf)
-  :components ((:test-file "tests/cl-arrowz"))
+  ;; :defsystem-depends-on (:prove-asdf)
+  ;; :components ((:test-file "tests/cl-arrowz"))
+  :components ((:file "tests/cl-arrowz"))
   :perform (test-op (o c)
                     (uiop:symbol-call :cl-arrowz/tests/cl-arrowz '#:test)))

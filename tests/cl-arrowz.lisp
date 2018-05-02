@@ -4,8 +4,6 @@
 	:cl-arrowz/cl-arrowz))
 (in-package :cl-arrowz/tests/cl-arrowz)
 
-(plan 8)
-
 (deftest test/->
   (ok (= (-> 3 /) (/ 3)))
   (ok (is-expand (-> 3 /) (/ 3)))
