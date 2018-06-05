@@ -31,7 +31,7 @@ The CL-ARROWZ package implements the following macros.
                         (mapcar (lambda (x) (* x 3)))
                         (remove-if #'oddp))
         (6 12)
-        CL-ARROWZ> 
+        CL-ARROWZ>
 
 `-<>`
 :   Thread the result of each form as the last argument to subsequent
@@ -135,4 +135,15 @@ The CL-ARROWZ package implements the following macros.
 
 This is intended to be a drop-in replacement for
 [CL-ARROWS](https://github.com/nightfly19/cl-arrows).  However unlike
-CL-ARROWS this package is actively maintained and has a license.
+CL-ARROWS this package has a license.
+
+Note, another option which is more popular and better maintained than
+cl-arrowz is [arrow-macros](https://github.com/hipeta/arrow-macros).
+Running the following commands from the base of a repository should be
+sufficient to switch from cl-arrowz to arrow-macros.
+
+    find . -name "*.asd" -or -name "*.lisp" -exec sed -i 's/cl-arrowz/arrow-macros/g' {} \+
+    find . -name "*.lisp" -exec sed -i 's/&>/some->/g' {} \+
+
+Unless you're using the `z>>` macro which could be replaced with `->>`
+without changing functionality.
